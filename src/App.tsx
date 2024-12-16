@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
 import { Copy, ClipboardCheck } from "lucide-react";
 import ParagraphSummarizer from "./ai/paragraph_summarizer/stage";
+import { jsonForSmallDataset } from "./dataset/input-data";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -29,30 +31,71 @@ function App() {
     const processedResults: {
       originalContent: string;
       compressedContent: string;
+      processingTimeMs: number;
+      originalSize: number;
+      compressedSize: number;
+      compressionRatio: number;
     }[] = [];
 
-    const jsonlContent = `{"title": "Getting Started with Python", "originalContent": "Python is an interpreted, high-level programming language known for its simplicity and readability. It emphasizes clean code through proper indentation and straightforward syntax. The language supports multiple programming paradigms including procedural, object-oriented, and functional programming."}
-    {"title": "JavaScript Basics", "originalContent": "JavaScript is a dynamic programming language that's primarily used for web development. It enables interactive web pages and is an essential part of web applications. The language supports both frontend and backend development through various frameworks and runtime environments."}
-    {"title": "Introduction to Git", "originalContent": "Git is a distributed version control system that tracks changes in source code during software development. It allows multiple developers to work together on the same project while maintaining a complete history of modifications and the ability to work on different features simultaneously."}`;
+    for (const item of jsonForSmallDataset) {
+      // Start timing
+      const startTime = performance.now();
 
-    const lines = jsonlContent.trim().split("\n");
+      // Wait for compression to complete
+      const result = await compressContents(item.originalContent);
 
-    // Process lines sequentially
-    for (const line of lines) {
-      const data = JSON.parse(line);
-      console.log("Title:", data.title);
-      console.log("Content:", data.originalContent);
+      // End timing
+      const endTime = performance.now();
+      const processingTimeMs = endTime - startTime;
 
-      // Wait for compression to complete before moving to next line
-      const result = await compressContents(data.originalContent);
-      processedResults.push(result);
+      // Calculate sizes (in bytes)
+      const originalSize = new TextEncoder().encode(
+        item.originalContent
+      ).length;
+      const compressedSize = new TextEncoder().encode(
+        result.compressedContent
+      ).length;
+
+      // Calculate compression ratio
+      const compressionRatio = compressedSize / originalSize;
+
+      // Add the result with all metrics
+      processedResults.push({
+        ...result,
+        processingTimeMs,
+        originalSize,
+        compressedSize,
+        compressionRatio,
+      });
+
       console.log("Compressed:", result.compressedContent);
+      console.log("Processing time:", processingTimeMs.toFixed(2), "ms");
+      console.log("Original size:", originalSize, "bytes");
+      console.log("Compressed size:", compressedSize, "bytes");
+      console.log("Compression ratio:", compressionRatio.toFixed(3));
+      setOutputText(JSON.stringify(processedResults));
       console.log("---");
     }
 
-    // Update state with results after all processing is complete
-    // setResult(processedResults);
-    setOutputText(JSON.stringify(processedResults));
+    const totalProcessingTime = processedResults.reduce(
+      (sum, item) => sum + item.processingTimeMs,
+      0
+    );
+    const averageCompressionRatio =
+      processedResults.reduce((sum, item) => sum + item.compressionRatio, 0) /
+      processedResults.length;
+
+    console.log("Total processing time:", totalProcessingTime.toFixed(2), "ms");
+    console.log(
+      "Average compression ratio:",
+      averageCompressionRatio.toFixed(3)
+    );
+
+    return {
+      results: processedResults,
+      totalProcessingTimeMs: totalProcessingTime,
+      averageCompressionRatio,
+    };
   };
 
   const copyToClipboard = (text: string, type: string) => {

@@ -1,5 +1,9 @@
 export const PARAGRAPH_SUMMARIZER_PROMPT_TEMPLATE = `
-You are tasked with creating an ultra-concise summary of lengthy content. Your key objectives:
+You are tasked with creating an ultra-concise summary of lengthy content.
+
+Your key objectives:
+
+**DO NOT GO OVER 150 words**
 
 Essential Compression:
 - Create a summary that is definitively shorter than the original
