@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Copy, ClipboardCheck } from "lucide-react";
-import BulletConsolidator from "./ai/bullet_consolidator/stage";
+import ParagraphSummarizer from "./ai/paragraph_summarizer/stage";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -14,11 +14,45 @@ function App() {
     setInputText(e.target.value);
   };
 
+  const compressContents = async (originalContent: string) => {
+    const paragraphSummarizer = new ParagraphSummarizer();
+    const compressedContent = await paragraphSummarizer.summarizeToParagraph(
+      originalContent
+    );
+
+    // Return an object with originalContent and compressedContent
+    return { originalContent, compressedContent };
+  };
+
   const handleProcess = async () => {
-    const bulletConsolidator = new BulletConsolidator();
-    const bulletPointsConsolidated =
-      await bulletConsolidator.consolidateBulletPoints(inputText);
-    setOutputText(bulletPointsConsolidated);
+    setOutputText("");
+    const processedResults: {
+      originalContent: string;
+      compressedContent: string;
+    }[] = [];
+
+    const jsonlContent = `{"title": "Getting Started with Python", "originalContent": "Python is an interpreted, high-level programming language known for its simplicity and readability. It emphasizes clean code through proper indentation and straightforward syntax. The language supports multiple programming paradigms including procedural, object-oriented, and functional programming."}
+    {"title": "JavaScript Basics", "originalContent": "JavaScript is a dynamic programming language that's primarily used for web development. It enables interactive web pages and is an essential part of web applications. The language supports both frontend and backend development through various frameworks and runtime environments."}
+    {"title": "Introduction to Git", "originalContent": "Git is a distributed version control system that tracks changes in source code during software development. It allows multiple developers to work together on the same project while maintaining a complete history of modifications and the ability to work on different features simultaneously."}`;
+
+    const lines = jsonlContent.trim().split("\n");
+
+    // Process lines sequentially
+    for (const line of lines) {
+      const data = JSON.parse(line);
+      console.log("Title:", data.title);
+      console.log("Content:", data.originalContent);
+
+      // Wait for compression to complete before moving to next line
+      const result = await compressContents(data.originalContent);
+      processedResults.push(result);
+      console.log("Compressed:", result.compressedContent);
+      console.log("---");
+    }
+
+    // Update state with results after all processing is complete
+    // setResult(processedResults);
+    setOutputText(JSON.stringify(processedResults));
   };
 
   const copyToClipboard = (text: string, type: string) => {
