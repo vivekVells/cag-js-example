@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Copy, ClipboardCheck } from "lucide-react";
+import BulletConsolidator from "./ai/bullet_consolidator/stage";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -13,10 +14,11 @@ function App() {
     setInputText(e.target.value);
   };
 
-  const handleProcess = () => {
-    // TODO: Add your processing logic here
-    // For now, we'll just convert input to uppercase as a placeholder
-    setOutputText(inputText.toUpperCase());
+  const handleProcess = async () => {
+    const bulletConsolidator = new BulletConsolidator();
+    const bulletPointsConsolidated =
+      await bulletConsolidator.consolidateBulletPoints(inputText);
+    setOutputText(bulletPointsConsolidated);
   };
 
   const copyToClipboard = (text: string, type: string) => {
