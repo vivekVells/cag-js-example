@@ -3,6 +3,9 @@ import React, { useState } from "react";
 import { Copy, ClipboardCheck } from "lucide-react";
 import ParagraphSummarizer from "./ai/paragraph_summarizer/stage";
 import { jsonForSmallDataset } from "./dataset/input-data";
+import { jsonForLargeDataset } from "./dataset/large_articles";
+import { jsonForHumongousDataset } from "./dataset/humongous_articles";
+import { jsonForExtraLargeDataset } from "./dataset/extra_large_articles";
 
 function App() {
   const [inputText, setInputText] = useState("");
@@ -38,7 +41,12 @@ function App() {
       compressionRatio: number;
     }[] = [];
 
-    for (const item of jsonForSmallDataset) {
+    // const evaluateDataSet = jsonForSmallDataset;
+    // const evaluateDataSet = jsonForLargeDataset;
+    const evaluateDataSet = jsonForExtraLargeDataset;
+    // const evaluateDataSet = jsonForHumongousDataset;
+
+    for (const item of evaluateDataSet) {
       // Start timing
       const startTime = performance.now();
 

@@ -109,12 +109,21 @@ class CAG {
 
     const output: string[] = [];
     for (const chunk of chunks) {
-      this._ai = await this.initialize();
-      const prompt = prepare_prompt(this.prompt_template, chunk);
-      const response = await this._ai.prompt(prompt);
-      console.log(`Response for chunk: ${response}`);
-      output.push(response);
-      await this._ai.destroy();
+      try {
+        this._ai = await this.initialize();
+        const prompt = prepare_prompt(this.prompt_template, chunk);
+        const response = await this._ai.prompt(prompt);
+        console.log(`Response for chunk: ${response}`);
+        output.push(response);
+        await this._ai.destroy();
+      } catch (chunkError: any) {
+        console.error(`Error processing chunk: "${chunk}"`, chunkError);
+      } finally {
+        if (this._ai) {
+          await this._ai.destroy();
+          this._ai = null; // Clear reference to ensure no stale object
+        }
+      }
     }
 
     const combinedOutput = output.join(" ");
