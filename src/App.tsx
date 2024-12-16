@@ -29,6 +29,7 @@ function App() {
   const handleProcess = async () => {
     setOutputText("");
     const processedResults: {
+      title: string;
       originalContent: string;
       compressedContent: string;
       processingTimeMs: number;
@@ -61,6 +62,7 @@ function App() {
 
       // Add the result with all metrics
       processedResults.push({
+        title: item.title,
         ...result,
         processingTimeMs,
         originalSize,
