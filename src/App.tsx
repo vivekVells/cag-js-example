@@ -1,63 +1,83 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, ClipboardCheck } from "lucide-react";
 import ParagraphSummarizer from "./ai/paragraph_summarizer/stage";
-import { jsonForSmallDataset } from "./dataset/input-data";
-import { jsonForLargeDataset } from "./dataset/large_articles";
-import { jsonForHumongousDataset } from "./dataset/humongous_articles";
-import { jsonForExtraLargeDataset } from "./dataset/extra_large_articles";
+import { jsonForSmallDataset } from "./dataset/inputs/small_articles";
+import { jsonForMediumDataset } from "./dataset/inputs/medium_articles";
+import { jsonForLargeDataset } from "./dataset/inputs/large_articles";
+import { jsonForExtraLargeDataset } from "./dataset/inputs/extra_large_articles";
+import { jsonForHumongousDataset } from "./dataset/inputs/humongous_articles";
+
+// Define types for datasets
+type DatasetKey = "small" | "medium" | "large" | "extraLarge" | "humongous";
+type Dataset = {
+  title: string;
+  originalContent: string;
+};
+
+const datasetOptions = [
+  { label: "Small", value: "small" },
+  { label: "Medium", value: "medium" },
+  { label: "Large", value: "large" },
+  { label: "Extra Large", value: "extraLarge" },
+  { label: "Humongous", value: "humongous" },
+];
+
+const datasets: Record<DatasetKey, Dataset[]> = {
+  small: jsonForSmallDataset,
+  medium: jsonForMediumDataset,
+  large: jsonForLargeDataset,
+  extraLarge: jsonForExtraLargeDataset,
+  humongous: jsonForHumongousDataset,
+};
 
 function App() {
-  const [inputText, setInputText] = useState("");
-  const [outputText, setOutputText] = useState("");
-  const [inputCopied, setInputCopied] = useState(false);
-  const [outputCopied, setOutputCopied] = useState(false);
+  const [selectedDataset, setSelectedDataset] = useState<DatasetKey>("small");
+  const [outputText, setOutputText] = useState<string>("");
+  const [inputtedText, setInputtedText] = useState<string>("");
+  const [outputCopied, setOutputCopied] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [originalDataSize, setOriginalDataSize] = useState<number>(0);
+  const [compressedDataSize, setCompressedDataSize] = useState<number>(0);
 
-  const handleInputChange = (e: {
-    target: { value: React.SetStateAction<string> };
-  }) => {
-    setInputText(e.target.value);
-  };
+  // Load dataset content when selectedDataset changes
+  useEffect(() => {
+    const evaluateDataSet = datasets[selectedDataset];
+    const originalContents = evaluateDataSet.map(
+      (item) => JSON.stringify(item, null, 2) // Show the entire item in raw JSON format
+    );
+    setInputtedText(originalContents.join("\n\n"));
+
+    // Calculate total data size for original content
+    const totalSize = originalContents.reduce(
+      (acc, item) => acc + new TextEncoder().encode(item).length,
+      0
+    );
+    setOriginalDataSize(totalSize);
+  }, [selectedDataset]);
 
   const compressContents = async (originalContent: string) => {
     const paragraphSummarizer = new ParagraphSummarizer();
     const compressedContent = await paragraphSummarizer.summarizeToParagraph(
       originalContent
     );
-
-    // Return an object with originalContent and compressedContent
     return { originalContent, compressedContent };
   };
 
   const handleProcess = async () => {
     setOutputText("");
-    const processedResults: {
-      title: string;
-      originalContent: string;
-      compressedContent: string;
-      processingTimeMs: number;
-      originalSize: number;
-      compressedSize: number;
-      compressionRatio: number;
-    }[] = [];
+    setIsProcessing(true);
+    const processedResults: any[] = [];
+    let totalCompressedSize = 0;
 
-    // const evaluateDataSet = jsonForSmallDataset;
-    // const evaluateDataSet = jsonForLargeDataset;
-    const evaluateDataSet = jsonForExtraLargeDataset;
-    // const evaluateDataSet = jsonForHumongousDataset;
+    const evaluateDataSet = datasets[selectedDataset];
 
     for (const item of evaluateDataSet) {
-      // Start timing
       const startTime = performance.now();
-
-      // Wait for compression to complete
       const result = await compressContents(item.originalContent);
-
-      // End timing
       const endTime = performance.now();
       const processingTimeMs = endTime - startTime;
 
-      // Calculate sizes (in bytes)
       const originalSize = new TextEncoder().encode(
         item.originalContent
       ).length;
@@ -65,10 +85,10 @@ function App() {
         result.compressedContent
       ).length;
 
-      // Calculate compression ratio
+      totalCompressedSize += compressedSize;
+
       const compressionRatio = compressedSize / originalSize;
 
-      // Add the result with all metrics
       processedResults.push({
         title: item.title,
         ...result,
@@ -77,52 +97,22 @@ function App() {
         compressedSize,
         compressionRatio,
       });
-
-      console.log("Compressed:", result.compressedContent);
-      console.log("Processing time:", processingTimeMs.toFixed(2), "ms");
-      console.log("Original size:", originalSize, "bytes");
-      console.log("Compressed size:", compressedSize, "bytes");
-      console.log("Compression ratio:", compressionRatio.toFixed(3));
-      setOutputText(JSON.stringify(processedResults));
-      console.log("---");
     }
 
-    const totalProcessingTime = processedResults.reduce(
-      (sum, item) => sum + item.processingTimeMs,
-      0
-    );
-    const averageCompressionRatio =
-      processedResults.reduce((sum, item) => sum + item.compressionRatio, 0) /
-      processedResults.length;
-
-    console.log("Total processing time:", totalProcessingTime.toFixed(2), "ms");
-    console.log(
-      "Average compression ratio:",
-      averageCompressionRatio.toFixed(3)
-    );
-
-    return {
-      results: processedResults,
-      totalProcessingTimeMs: totalProcessingTime,
-      averageCompressionRatio,
-    };
+    // Show the entire processed result in raw JSON format
+    setOutputText(JSON.stringify(processedResults, null, 2));
+    setCompressedDataSize(totalCompressedSize);
+    setIsProcessing(false);
   };
 
-  const copyToClipboard = (text: string, type: string) => {
+  const copyToClipboard = (text: string) => {
     navigator.clipboard
       .writeText(text)
       .then(() => {
-        if (type === "input") {
-          setInputCopied(true);
-          setTimeout(() => setInputCopied(false), 2000);
-        } else {
-          setOutputCopied(true);
-          setTimeout(() => setOutputCopied(false), 2000);
-        }
+        setOutputCopied(true);
+        setTimeout(() => setOutputCopied(false), 2000);
       })
-      .catch((err) => {
-        console.error("Failed to copy: ", err);
-      });
+      .catch((err) => console.error("Failed to copy: ", err));
   };
 
   return (
@@ -132,43 +122,56 @@ function App() {
           CAG JS Implementation Example
         </h1>
 
-        <div className="mb-6 relative">
+        <div className="mb-6">
           <label
-            htmlFor="input-text"
-            className="block mb-3 text-gray-700 font-semibold text-lg"
+            htmlFor="dataset-selector"
+            className="block mb-2 text-gray-700 font-semibold text-lg"
           >
-            Input Text
+            Select Dataset
           </label>
-          <div className="relative">
-            <textarea
-              id="input-text"
-              className="w-full p-4 border-2 border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 resize-none text-base h-48"
-              value={inputText}
-              onChange={handleInputChange}
-              placeholder="Enter your text here..."
-            />
-            <button
-              onClick={() => copyToClipboard(inputText, "input")}
-              className="absolute top-3 right-3 text-blue-600 hover:text-blue-800 transition-colors"
-              title="Copy Input"
-            >
-              {inputCopied ? (
-                <ClipboardCheck className="w-6 h-6 text-green-500" />
-              ) : (
-                <Copy className="w-6 h-6" />
-              )}
-            </button>
-          </div>
+          <select
+            id="dataset-selector"
+            className="w-full p-3 border-2 border-blue-200 rounded-lg bg-gray-100"
+            value={selectedDataset}
+            onChange={(e) => setSelectedDataset(e.target.value as DatasetKey)}
+          >
+            {datasetOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="flex justify-center my-6">
           <button
             onClick={handleProcess}
-            disabled={!inputText}
+            disabled={isProcessing}
             className="bg-green-500 text-white px-8 py-3 rounded-full hover:bg-green-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 text-lg"
           >
-            <span>Process</span>
+            <span>{isProcessing ? "Processing..." : "Process"}</span>
           </button>
+        </div>
+
+        <div className="relative mb-6">
+          <label
+            htmlFor="inputted-text"
+            className="block mb-3 text-gray-700 font-semibold text-lg"
+          >
+            Original Contents
+          </label>
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-500 text-sm">
+              Total Data Size: {originalDataSize} bytes
+            </span>
+          </div>
+          <textarea
+            id="inputted-text"
+            className="w-full p-4 border-2 border-blue-200 rounded-lg bg-gray-100 resize-none text-base h-48"
+            value={inputtedText}
+            readOnly
+            placeholder="Dataset content will appear here..."
+          />
         </div>
 
         <div className="relative">
@@ -176,8 +179,13 @@ function App() {
             htmlFor="output-text"
             className="block mb-3 text-gray-700 font-semibold text-lg"
           >
-            Output Text
+            Compressed Contents
           </label>
+          <div className="flex justify-between mb-2">
+            <span className="text-gray-500 text-sm">
+              Total Data Size: {compressedDataSize} bytes
+            </span>
+          </div>
           <div className="relative">
             <textarea
               id="output-text"
@@ -187,7 +195,7 @@ function App() {
               placeholder="Processed output will appear here..."
             />
             <button
-              onClick={() => copyToClipboard(outputText, "output")}
+              onClick={() => copyToClipboard(outputText)}
               className="absolute top-3 right-3 text-blue-600 hover:text-blue-800 transition-colors"
               disabled={!outputText}
               title="Copy Output"
