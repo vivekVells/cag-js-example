@@ -14,6 +14,8 @@ The cag-js playground is designed to help developers gain practical experience w
 - 📝 Example components showcasing content summarization, expansion, and multi-stage processing using cag-js.
 - 🔍 Easy experimentation and validation of cag-js capabilities.
 
+![CAG-JS Demo](/demo/humongous_data_set.png)
+
 ## Prerequisites
 
 Before you begin, make sure you have the following:
