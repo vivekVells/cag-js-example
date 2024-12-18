@@ -1,52 +1,62 @@
-# React cag-js-example with Vite and TypeScript
+# CAG-JS Playground
 
-![GitHub license](https://img.shields.io/github/license/himalaya0035/chrome-extension-boilerplate-react-vite-typescript)
-![React](https://img.shields.io/badge/react-18.x-blue)
-![TypeScript](https://img.shields.io/badge/typescript-5.x-blue)
-![Tailwind CSS](https://img.shields.io/badge/tailwindcss-3.x-blue)
-![Vite](https://img.shields.io/badge/vite-4.x-blue)
+![CAG-JS](https://img.shields.io/npm/v/cag-js)
 
-This repository aims to provide an easy-to-use and minimilastic foundation for developing Chrome extensions using modern web technologies, including React for building the user interface, TypeScript for type-safe development, Tailwind CSS for effortless styling, and Vite as the module bundler for speedy development.
-
-The focus is on providing a minimalistic and straightforward boilerplate for fast Chrome extension development, without unnecessary complexities.
+This repository serves as a playground to validate and experiment with the [cag-js](https://www.npmjs.com/package/cag-js) library for efficient content processing within the browser. It provides a hands-on environment to test and explore the capabilities of cag-js, enabling developers to process large content inputs directly using Chrome's built-in Gemini Nano model.
 
 ## About
 
-As a developer, I struggled to find a comprehensive and straightforward resource to kickstart building Chrome extensions with React, Vite, and TypeScript. To bridge this gap, I decided to build it on my own. This project is born out of the frustration I faced and my desire to make the development process easier for fellow developers.
-
- Explore this minimalistic boilerplate that includes the necessary tools for Chrome extension development while keeping things simple and approachable.
-
+The cag-js playground is designed to help developers gain practical experience with cag-js and understand how it can be used to efficiently process large content inputs within the browser. By providing a set of example components and a user-friendly interface, the playground aims to showcase the power of cag-js in enabling sophisticated AI-powered content transformations without relying on external APIs.
 
 ## Features
 
-- 🚀 Fast development with Vite's hot module replacement.
-- ⚙️ Dynamic manifest generation using the CRXJS vite plugin.
-- ⚛️ React-based user interface for the extension's popup, options page, and other components.
-- 🔧 TypeScript configuration for type-safe coding.
-- 🎨 Integrated with Tailwind CSS for flexible styling (Feel free to remove tailwind, if not required).
-- ⚡️ **Out-of-the-box support for background scripts, options pages, and content scripts. Customize them to fit your needs without the hassle of manual setup. Just start developing right away!**
+- 🧩 Integration with the [cag-js](https://www.npmjs.com/package/cag-js) library for efficient content processing using Chrome's built-in Gemini Nano model.
+- 📝 Example components showcasing content summarization, expansion, and multi-stage processing using cag-js.
+- 🔍 Easy experimentation and validation of cag-js capabilities.
 
 ## Prerequisites
 
-Before you begin, make sure you have the following installed:
+Before you begin, make sure you have the following:
 
 - Node.js (recommended version 16.x or higher)
 - npm (comes with Node.js)
+- Google Chrome Canary (with Gemini Nano support)
+
+<details>
+<summary>Getting started with Gemini Nano and Chrome Canary</summary>
+
+I'm sure you want to experiment with that too? Let's see how to proceed:
+
+- First of all, you'll need to download Chrome Canary
+- In `chrome://flags`, you must **enable** two experiments:
+  - `Prompt API for Gemini Nano` and
+  - `Enables optimization guide on device`.
+- You'll have to restart the browser, after having enabled those two flags.
+
+It may take quite a bit of time to download Gemini Nano (as it's a small model, it takes only around 1.7GB of space, but you'll need about 20GB at installation time on your hard drive) but the API will tell you if the model weights are not fully downloaded yet.
+
+</details>
+
+## Important Note
+
+As of December 17, 2024, the built-in Gemini Nano model is only supported in the Canary version of the Chrome browser. To use cag-js and this playground, you need to have Google Chrome Canary installed. Additionally, you may need to enable AI usage in Chrome Canary by following the steps mentioned in the prerequisites section.
+
+Please keep in mind that the availability and steps to enable AI usage in Chrome may change in the future.
 
 ## Getting Started
 
-Follow these steps to get the boilerplate code up and running:
+Follow these steps to get the playground up and running:
 
 1. **Clone the repository:**
 
     ```bash
-    git clone https://github.com/himalaya0035/chrome-extension-boilerplate-react-vite-typescript
+    git clone https://github.com/yourusername/cag-js-playground
     ```
 
 2. **Navigate to the project folder:**
 
     ```bash
-    cd chrome-extension-boilerplate-react-vite-typescript
+    cd cag-js-playground
     ```
 
 3. **Install dependencies:**
@@ -61,33 +71,28 @@ Follow these steps to get the boilerplate code up and running:
     npm run dev
     ```
 
-    This command will start the development server using Vite, enabling hot module replacement and allowing you to see your changes in real.
-5. **Load the extension in Chrome:**
+    This command will start the development server, allowing you to access the playground in your browser.
 
-    - Open the Chrome browser.
-    - Navigate to `chrome://extensions/`.
-    - Turn on the "Developer mode" toggle in the top-right corner.
-    - Click the "Load unpacked" button and select the `dist` folder inside your project directory.
+5. **Open the playground in Chrome Canary:**
 
-6. **Start Developing:**
+    - Open the Google Chrome Canary browser.
+    - Navigate to `http://localhost:3000` (or the URL provided by the development server).
 
-    - The popup UI can be found in the `src/App.tsx` directory.
-    - Customize the manifest template in `src/manifest.json` and let CRXJS handle the dynamic manifest generation.
-    - The support for background scripts, options page, content scripts is already configured. Customise them in their respective folder.
+6. **Explore the example components and experiment:**
 
-7. **Build for Production:**
+    - The playground includes example components that demonstrate various cag-js functionalities, such as content summarization, expansion, and multi-stage processing.
+    - Interact with the components to see how cag-js processes the content within the browser using Chrome's built-in Gemini Nano model.
+    - Feel free to modify the code, try different inputs, and experiment with cag-js to validate its capabilities.
 
-    When you're ready to publish your extension, create a production build by running:
+7. **Customize and build upon the playground:**
 
-    ```bash
-    npm run build
-    ```
-
-    The optimized files will be available in the `dist` folder. You can then package this folder to distribute your extension.
+    - Use the playground as a starting point to build your own applications or integrate cag-js into your existing projects.
+    - Modify the components and functionality to suit your specific requirements.
+    - Leverage the cag-js library to implement your own content processing logic.
 
 ## Contributing
 
-Contributions are welcome! If you encounter any issues or have ideas for improvements, feel free to open an issue or submit a pull request.
+Contributions are welcome! If you encounter any issues, have suggestions for improvements, or want to add more examples to the playground, feel free to open an issue or submit a pull request.
 
 ## License
 
@@ -95,13 +100,10 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Support
 
-⭐️ If you find this boilerplate helpful, consider giving it a star on [GitHub](https://github.com/himalaya0035/chrome-extension-boilerplate-react-vite-typescript).
+⭐️ If you find this playground helpful, consider giving it a star on [GitHub](https://github.com/yourusername/cag-js-playground).
 
 ---
 
-Happy coding! If you have any questions or need further assistance, please don't hesitate to reach out.
-
-**Disclaimer:** This project was created by [Himalaya Gupta](https://github.com/himalaya0035/), for the community, to address the lack of comprehensive resources for building Chrome extensions with React, Vite, TypeScript, and Tailwind CSS. It is not officially endorsed by any of the mentioned technologies or organizations.
+Happy experimenting and validating cag-js! If you have any questions or need further assistance, please don't hesitate to reach out.
 
 ---
-
